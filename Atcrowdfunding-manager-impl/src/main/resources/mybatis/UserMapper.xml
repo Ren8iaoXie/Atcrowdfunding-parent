@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xrb.manager.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="cn.xrb.domain.User">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="loginacct" jdbcType="VARCHAR" property="loginacct" />
+    <result column="userpswd" jdbcType="CHAR" property="userpswd" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="createtime" jdbcType="CHAR" property="createtime" />
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.xrb.domain.User">
+    insert into t_user (id, loginacct, userpswd, 
+      username, email, createtime
+      )
+    values (#{id,jdbcType=INTEGER}, #{loginacct,jdbcType=VARCHAR}, #{userpswd,jdbcType=CHAR}, 
+      #{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{createtime,jdbcType=CHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.xrb.domain.User">
+    update t_user
+    set loginacct = #{loginacct,jdbcType=VARCHAR},
+      username = #{username,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, loginacct, userpswd, username, email, createtime
+    from t_user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, loginacct, userpswd, username, email, createtime
+    from t_user
+  </select>
+
+  <select id="getUserByUAP" resultMap="BaseResultMap" parameterType="user">
+    select id, loginacct, userpswd, username, email, createtime
+    from t_user
+    where loginacct = #{loginacct} and userpswd = #{userpswd}
+  </select>
+
+  <select id="getUserByPageByCondition" parameterType="string" resultMap="BaseResultMap">
+    select  id, loginacct, userpswd, username, email, createtime
+    from t_user
+    <where>
+      <if test="loginacct!=null and loginacct!=''">
+        loginacct like concat("%",#{loginacct},"%")
+      </if>
+    </where>
+    order by createtime desc
+  </select>
+
+  <select id="queryList" resultMap="BaseResultMap">
+    select id, loginacct, userpswd, username, email, createtime
+    from t_user limit #{startIndex},#{pagesize}
+  </select>
+
+  <select id="queryCount" resultType="int">
+    select count(*)
+    from t_user
+  </select>
+
+
+
+  <select id="queryAllRole" resultType="role">
+    select * from t_role;
+  </select>
+
+  <select id="queryRoleByUserId" resultType="int">
+    select roleid from t_user_role where userid=#{id};
+  </select>
+
+  <insert id="saveUserRoleRelationship" >
+    insert into t_user_role(userid,roleid) values (#{userid},#{roleid})
+  </insert>
+
+  <insert id="saveUserRoleRelationship2" >
+    <foreach collection="data.ids" item="roleid" separator=";">
+    insert into t_user_role(userid,roleid) values (#{userid},#{roleid})
+    </foreach>
+  </insert>
+
+  <delete id="deleteUserRoleRelationship" >
+    delete from t_user_role
+    where userid=#{userid} and roleid=#{roleid}
+  </delete>
+
+  <select id="queryPermissionByUserId" resultType="permission">
+     select distinct t_permission.id,t_permission.pid,t_permission.name,t_permission.icon,t_permission.url
+      from t_permission,t_role_permission,t_role,t_user_role,t_user
+      where t_permission.id=t_role_permission.permissionid
+       and t_role_permission.roleid=t_role.id
+       and t_role.id=t_user_role.roleid
+      and t_user_role.userid=t_user.id
+       and t_user.id=#{id} order by t_permission.id;
+  </select>
+</mapper>

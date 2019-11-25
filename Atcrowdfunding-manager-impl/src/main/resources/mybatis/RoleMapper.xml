@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xrb.manager.dao.RoleMapper">
+  <resultMap id="BaseResultMap" type="cn.xrb.domain.Role">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_role
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.xrb.domain.Role">
+    insert into t_role (id, name)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="cn.xrb.domain.Role">
+    update t_role
+    set name = #{name,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, name
+    from t_role
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, name
+    from t_role
+  </select>
+
+
+  <select id="queryRoleByCondition" resultMap="BaseResultMap">
+    select *
+    from t_role
+    <where>
+      <if test="name!=null and name!=''">
+        name like concat("%",#{name},"%")
+      </if>
+    </where>
+  </select>
+
+  <delete id="deleteRoleRolePermission" parameterType="java.lang.Integer">
+    delete from t_role_permission
+    where roleid = #{roleid,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="savaRolePermission" parameterType="cn.xrb.domain.RolePermission" >
+    insert into t_role_permission (roleid,permissionid)
+    values (#{roleid}, #{permissionid})
+  </insert>
+</mapper>
